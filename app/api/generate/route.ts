@@ -14,17 +14,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing systemPrompt or userMessage' }, { status: 400 })
     }
 
-    const response = await client.messages.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await (client.messages.create as any)({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 3000,
       system: systemPrompt,
       tools: [{ type: 'web_search_20250305', name: 'web_search' }],
       messages: [{ role: 'user', content: userMessage }],
-    } as Parameters<typeof client.messages.create>[0])
+    })
 
-    const text = response.content
-      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-      .map(b => b.text)
+    const text = (response.content as Array<{ type: string; text?: string }>)
+      .filter((b) => b.type === 'text')
+      .map((b) => b.text ?? '')
       .join('\n')
 
     return NextResponse.json({ text })
