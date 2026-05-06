@@ -124,8 +124,8 @@
 .generateBtn {
   width: 100%;
   padding: 11px 0;
-  background: var(--accent);
-  color: #000;
+  background: #1a6dff;
+  color: #fff;
   border: none;
   border-radius: var(--radius-sm);
   font-size: 14px;
@@ -148,7 +148,7 @@
   width: 14px;
   height: 14px;
   border: 2px solid rgba(0,0,0,0.2);
-  border-top-color: #000;
+  border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;

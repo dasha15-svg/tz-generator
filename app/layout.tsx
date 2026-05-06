@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'ТЗ Генератор | SEO Studio',
-  description: 'Інструмент для формування технічних завдань для копірайтерів',
+  title: 'ТЗ Генератор | ILION Digital',
+  description: 'Інструмент ILION для формування технічних завдань для копірайтерів',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

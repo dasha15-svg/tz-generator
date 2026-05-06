@@ -1,18 +1,18 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0f0f10;
-  --bg-panel: #18181b;
-  --bg-input: #1e1e23;
-  --bg-output: #16161a;
-  --border: rgba(255,255,255,0.08);
+  --bg: #060608;
+  --bg-panel: #0e0e12;
+  --bg-input: #141418;
+  --bg-output: #0b0b0f;
+  --border: rgba(255,255,255,0.07);
   --border-hover: rgba(255,255,255,0.15);
-  --text: #e8e8e8;
+  --text: #f0f0f2;
   --text-muted: #888;
-  --text-hint: #555;
-  --accent: #f0a500;
-  --accent-dim: rgba(240,165,0,0.12);
-  --accent-text: #f0a500;
+  --text-hint: #444;
+  --accent: #1a6dff;
+  --accent-dim: rgba(26,109,255,0.12);
+  --accent-text: #4d8fff;
   --success: #22c55e;
   --danger: #ef4444;
   --radius: 10px;
@@ -32,12 +32,10 @@ body {
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 99px; }
 
-/* Form elements */
 input, select, textarea {
   background: var(--bg-input);
   border: 1px solid var(--border);
@@ -51,10 +49,6 @@ input, select, textarea {
   transition: border-color 0.15s;
   resize: vertical;
 }
-input:focus, select:focus, textarea:focus {
-  border-color: var(--border-hover);
-}
-select option { background: #1e1e23; }
-
-/* Placeholder */
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+select option { background: #141418; }
 ::placeholder { color: var(--text-hint); }

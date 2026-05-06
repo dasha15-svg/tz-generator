@@ -174,7 +174,7 @@ export default function TZGenerator() {
           <div className={styles.logo}>
             <span className={styles.logoIcon}>⚡</span>
             <span>ТЗ Генератор</span>
-            <span className={styles.badge}>SEO Studio</span>
+            <span className={styles.badge}>ilion.digital</span>
           </div>
           <div className={styles.headerHint}>Введи ключ → отримай готове ТЗ для копірайтера за 30 сек</div>
         </div>
@@ -280,7 +280,7 @@ export default function TZGenerator() {
                 <span className={styles.btnLoading}>
                   <span className={styles.spinner} /> Генерую...
                 </span>
-              ) : '⚡ Згенерувати ТЗ'}
+              ) : 'Згенерувати ТЗ'}
             </button>
           </div>
         </aside>
