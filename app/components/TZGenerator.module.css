@@ -124,8 +124,8 @@
 .generateBtn {
   width: 100%;
   padding: 11px 0;
-  background: #1a6dff;
-  color: #fff;
+  background: var(--accent);
+  color: #000;
   border: none;
   border-radius: var(--radius-sm);
   font-size: 14px;
@@ -148,7 +148,7 @@
   width: 14px;
   height: 14px;
   border: 2px solid rgba(0,0,0,0.2);
-  border-top-color: #fff;
+  border-top-color: #000;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;
@@ -274,4 +274,159 @@
   white-space: pre-wrap;
   word-break: break-word;
   margin: 0;
+}
+
+/* ── ILION BRANDING ── */
+.logoI { color: #1a6dff; font-style: italic; font-weight: 700; font-size: 16px; }
+.logoLion { font-weight: 700; font-size: 15px; color: #fff; }
+.logoDot { color: #1a6dff; font-weight: 700; }
+.logoDigital { font-size: 13px; color: #888; font-weight: 400; margin-right: 8px; }
+
+/* ── MODE TABS ── */
+.modeTabs {
+  display: flex;
+  gap: 2px;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+.modeTab {
+  padding: 5px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.modeTabActive {
+  background: #1a6dff;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* ── BATCH MODE ── */
+.batchBody {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.batchInput {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.batchFormatHint {
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  line-height: 1.8;
+}
+.batchFormatHint code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #4d8fff;
+  background: rgba(26,109,255,0.1);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.batchExample {
+  background: rgba(26,109,255,0.05);
+  border: 1px solid rgba(26,109,255,0.15);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+}
+.batchExampleTitle { font-size: 11px; color: #4d8fff; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.batchExampleText { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); white-space: pre-wrap; margin: 0; }
+.batchTextarea {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 13px !important;
+  line-height: 1.7;
+  min-height: 180px;
+}
+.batchActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.uploadBtn {
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.uploadBtn:hover { border-color: var(--border-hover); color: var(--text); }
+.batchCount { font-size: 12px; color: #4d8fff; font-weight: 500; }
+.batchError { font-size: 12px; color: var(--danger); }
+
+/* Progress */
+.batchResults { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.progressWrap { display: flex; align-items: center; gap: 12px; }
+.progressBar { flex: 1; height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.progressFill { height: 100%; background: #1a6dff; border-radius: 99px; transition: width 0.3s; }
+.progressText { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.stopBtn {
+  font-size: 12px; padding: 4px 10px; background: transparent;
+  border: 1px solid rgba(239,68,68,0.4); border-radius: var(--radius-sm);
+  color: #ef4444; cursor: pointer;
+}
+
+/* Grid */
+.batchGrid { display: grid; grid-template-columns: 260px 1fr; gap: 12px; flex: 1; min-height: 0; }
+.batchList { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+.batchItem {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.batchItem:hover { border-color: var(--border-hover); background: rgba(255,255,255,0.03); }
+.batchItemActive { border-color: #1a6dff !important; background: rgba(26,109,255,0.06) !important; }
+.batchItemStatus { font-size: 13px; width: 16px; text-align: center; color: var(--text-muted); flex-shrink: 0; }
+.batchItemInfo { flex: 1; min-width: 0; }
+.batchItemCat { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.batchItemKey { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.copySmall {
+  font-size: 11px; padding: 2px 8px; background: transparent;
+  border: 1px solid var(--border); border-radius: 4px; color: var(--text-muted);
+  cursor: pointer; flex-shrink: 0;
+}
+.copySmall:hover { border-color: var(--border-hover); color: var(--text); }
+.newBatchBtn {
+  margin-top: 4px; padding: 8px; background: transparent;
+  border: 1px dashed var(--border); border-radius: var(--radius-sm);
+  color: var(--text-hint); font-size: 13px; cursor: pointer; width: 100%;
+  transition: border-color 0.15s, color 0.15s;
+}
+.newBatchBtn:hover { border-color: var(--border-hover); color: var(--text-muted); }
+
+.batchPreview {
+  overflow-y: auto;
+  background: var(--bg-output);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+.batchPreviewEmpty {
+  height: 100%; display: flex; align-items: center; justify-content: center;
+  color: var(--text-hint); font-size: 13px;
+}
+
+/* Logo image */
+.logoImg {
+  height: 32px;
+  width: auto;
+  display: block;
+  mix-blend-mode: lighten;
 }
