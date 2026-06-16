@@ -35,12 +35,13 @@ const LANGUAGES = [
   { id: 'pl', label: '🇵🇱 Polski' },
 ]
 
-const WORD_RANGES = [
-  { id: '300-500', label: '300–500 (коротко)' },
-  { id: '600-900', label: '600–900 (середньо)' },
-  { id: '1000-1500', label: '1000–1500 (стандарт)' },
-  { id: '1500-2500', label: '1500–2500 (розгорнуто)' },
+const CHAR_RANGES = [
+  { id: '3000-5000', label: '3000–5000 символів' },
+  { id: '5000-7000', label: '5000–7000 символів' },
+  { id: '7000-9000', label: '7000–9000 символів' },
+  { id: '9000-12000', label: '9000–12000 символів' },
   { id: 'auto', label: 'Авто (за топом)' },
+  { id: 'custom', label: 'Свій діапазон...' },
 ]
 
 interface BatchItem {
@@ -56,47 +57,177 @@ interface BatchResult {
   status: 'pending' | 'processing' | 'done' | 'error'
 }
 
-function buildSystemPrompt(niche: string, pageType: string, language: string, wordRange: string) {
+function buildSystemPrompt(niche: string, pageType: string, language: string, charRange: string, customChars?: string) {
   const langName: Record<string, string> = { uk: 'українська', ru: 'російська', en: 'English', pl: 'polska' }
   const nicheLabel = NICHES.find(n => n.id === niche)?.label ?? niche
   const pageLabel = PAGE_TYPES.find(p => p.id === pageType)?.label ?? pageType
-  const wordLabel = WORD_RANGES.find(w => w.id === wordRange)?.label ?? wordRange
+  const charLabel = charRange === 'custom' && customChars
+    ? `${customChars} символів`
+    : CHAR_RANGES.find(w => w.id === charRange)?.label ?? charRange
+  const lang = langName[language] ?? language
 
-  return `Ти — досвідчений SEO-редактор і контент-стратег. Формуєш чіткі ТЗ для копірайтерів.
+  const isMedical = niche === 'medical' || niche === 'beauty'
+  const isEcom = niche === 'ecommerce_sports' || niche === 'ecommerce_general'
+  const isRealEstate = niche === 'real_estate'
 
-НІША: ${nicheLabel} | ТИП: ${pageLabel} | МОВА: ${langName[language] ?? language} | ОБСЯГ: ${wordLabel}
+  const nicheSpecific = isMedical
+    ? `• Використати цитату лікаря / експерта (пряма мова)
+• В кінці додати блок <H3>Джерела</H3> з посиланнями на наукові/медичні джерела
+• Для FAQ додати "Детальніше тут" з перелінковкою де доречно
+• Тон: доказова медицина, людська мова, без жаргону`
+    : isEcom
+    ? `• Додати таблицю цін якщо доречно
+• Вказати анкори для внутрішньої перелінковки (назва товару → URL категорії)
+• Тон: інформаційний, допомагає вибрати продукт
+• Перший абзац — основний ключ обов'язково`
+    : isRealEstate
+    ? `• Аналіз районів / локацій де доречно
+• Таблиця або список цін по районах
+• Відповісти на питання про іноземців, інвестиції, ризики
+• Тон: довірливий, експертний`
+    : `• Тон відповідно до ніші
+• Списки там де є перелічення 3+ пунктів`
 
-Структура ТЗ:
+  return `Ти — SEO-редактор агенції iLION Digital. Формуєш ТЗ для копірайтерів за форматом агенції.
+Нижче наведено реальні приклади наших ТЗ. Дотримуйся такого ж стилю і структури.
+
+=== ПРИКЛАДИ НАШИХ ТЗ (вивчи формат) ===
+
+ПРИКЛАД 1 (медична клініка, сторінка послуги, укр):
 ---
-📋 ТЗ ДЛЯ КОПІРАЙТЕРА: [назва категорії]
----
-🔑 КЛЮЧОВІ СЛОВА
-- Основне: [ключ]
-- Додаткові: [список]
-- LSI/семантика: [список]
-
-📏 ОБСЯГ: [слів] | 🌐 МОВА: [мова]
-
-🏷 МЕТА-ТЕГИ
-Title: [до 60 символів]
-Description: [140–160 символів]
-
-📝 СТРУКТУРА
-H1: [конкретний заголовок]
-Вступ: [що писати]
-H2: [назва] → [що писати, які ключі]
-H2: [назва] → [що писати]
-[продовжити...]
-Висновок/CTA: [що написати]
-
-⚠️ СТИЛЬ
-- [вимоги до тону та стилю]
-- Заборонені штампи: [перелік]
-
-📊 АНАЛІЗ ТОП-3: [коротко що є у конкурентів і чим відрізнятись]
+ТЗ на написання тексту
+https://icsi.clinic/нова_категорія
+Основне ключове слово — УЗД калитки
+Мета тексту: дати важливу інформацію доступною людською мовою, коректно з погляду доказової медицини.
+Кількість символів: 3000-4000
+Ключі (мінімум 1 раз): узд органів калитки / узд калитки / узд яєчок / узд мошонки / узд калитки київ / узд калитки ціна
+Структура:
+H1: УЗД калитки
+Вступ: для чого і кому рекомендується
+H2: Показання до УЗД органів калитки
+H2: Що показує УЗД калитки (список проблем)
+H2: Захворювання, що діагностує УЗД мошонки
+H2: Підготовка до проведення УЗД калитки
+H2: Як проходить процедура УЗД яєчок
+H2: Чому варто пройти УЗД калитки в ICSI Clinic (переваги клініки)
+H2: УЗД органів калитки: ціна в ICSI Clinic
+FAQ: Що таке УЗД органів калитки? / Як підготуватися? / Що показує?
+Цитата лікаря: обов'язково
 ---
 
-Давай КОНКРЕТНІ заголовки, не шаблони. Роби пошук за ключем якщо немає URL. Відповідай тільки ТЗ-ком без вступів. Мова відповіді: українська.`
+ПРИКЛАД 2 (медичний блог, стаття, укр):
+---
+ТЗ на написання тексту — блог
+Тема: Доброякісні пухлини молочної залози
+Кількість символів: 7000-8000
+Структура:
+H1: Доброякісні пухлини молочної залози у жінок
+Вступ: поширеність, коротко що це
+H2: Види доброякісних пухлин → H3 для кожного виду (Фіброаденома, Кісти, Папілома, Ліпома, Мастопатія)
+H2: Симптоми
+H2: Причини та фактори (стрес, гормони, спадковість)
+H2: Відмінність доброякісної від злоякісної
+H2: Методи діагностики
+H2: Як лікувати (медикаментозне + оперативне)
+H2: Профілактика
+H2: Прогноз і ускладнення
+H2: Висновки → H3: Джерела
+FAQ з посиланням "Детальніше тут"
+LSI: фіброаденома, кіста, мастопатія, УЗД, мамолог, біопсія, гормональні порушення
+---
+
+ПРИКЛАД 3 (спортивне харчування, категорія, укр):
+---
+Тема: Казеїн для набору маси
+Кількість символів: 2500-3500
+Основний ключ — в першому абзаці обов'язково, решта рівномірно
+H1: Казеїн для набору маси
+Вступ (передмова)
+H2: Що таке казеїн для набору маси
+H2: Користь казеїну
+H2: Як приймати
+H2: Кому можна приймати
+H2: Скільки коштує казеїн в Києві? (таблиця цін)
+FAQ: Чи можна пити замість вечері? / Чи набирають жир? / Коли результат?
+LSI: який краще, ціна, відгуки, як приймати, перед сном, рейтинг
+---
+
+ПРИКЛАД 4 (нерухомість, стаття, рос):
+---
+Тема: Купить квартиру в Аликанте
+Кількість символів: 4000-5000
+Ключі рівномірно по тексту
+H1: [з основним ключем]
+Вступ: починати з визначення "Дом в Испании"
+H2: Продажа квартир в Аликанте
+H2: В каком районе Аликанте лучше приобрести квартиру (для ПМЖ, інвестиції, сумнівні райони)
+H2: Цены на квартиры в Аликанте (середня вартість м², по районах, ризики)
+H2: Почему стоит купить квартиру в Аликанте
+FAQ: Сколько стоит? / Почему дешевое жилье? / Можно ли иностранцу купить?
+---
+
+=== ПАРАМЕТРИ ПОТОЧНОГО ТЗ ===
+НІША: ${nicheLabel} | ТИП: ${pageLabel} | МОВА: ${lang} | ОБСЯГ: ${charLabel}
+
+=== ФОРМАТ ТЗ ЯКЕ ТРЕБА СФОРМУВАТИ ===
+
+---
+ТЗ НА НАПИСАННЯ ТЕКСТУ
+URL: [URL сторінки якщо відомий]
+
+Основне ключове слово — [основний ключ]
+
+Мета тексту: [1-2 речення — яку користь отримає читач]
+
+ТЕХНІЧНІ ВИМОГИ:
+• Мова тексту — ${lang}
+• Унікальність від 95%
+• Наявність маркованих та нумерованих списків
+• Вода не більше 15% — без: вступних конструкцій ("безперечно", "до речі", "нарешті"), синонімів в одному реченні, довгих речень без змісту, безликих оцінок ("актуальний", "ефективний", "сучасний", "унікальний", "карколомний")
+• Кількість символів: ${charLabel}
+• Текст корисний для користувача
+${nicheSpecific}
+
+СТОРІНКИ КОНКУРЕНТІВ ДЛЯ АНАЛІЗУ:
+[якщо URL надані — проаналізуй; якщо немає — знайди топ-3 за основним ключем самостійно]
+
+КЛЮЧОВІ СЛОВА (використати кожен мінімум 1 раз у тексті):
+• [основний ключ]
+• [варіанти і словоформи — кожен з нового рядка]
+[LSI-слова окремо після структури]
+
+МЕТА-ТЕГИ:
+Title: [до 60 символів, основний ключ на початку]
+Description: [140-160 символів, заклик до дії в кінці]
+
+СТРУКТУРА (приблизна, можна перефразувати якщо не логічно):
+
+<H1>: [конкретний заголовок]
+
+Вступ (150-200 символів): [що охопити]
+
+<H2>: [конкретна назва]
+→ [Що писати: тези, факти, ключі, обсяг блоку]
+
+<H2>: [конкретна назва]
+→ [Що писати...]
+
+[мінімум 4-6 H2, додавати H3 де є класифікації або підтипи]
+
+ОБОВ'ЯЗКОВО включити:
+• H2 у форматі питання користувача (long-tail, PAA-стиль) — наприклад: "Коли потрібна консультація ембріолога?", "Як вибрати квартиру в Аликанте для інвестицій?" — це важливо для AI-пошуку та голосового пошуку
+• H2 з назвою бренду/клініки якщо є: "Чому обирають [бренд]" або "[Послуга]: ціна в [бренді]"
+• FAQ блок в кінці (4-5 питань)
+
+LSI-СЛОВА (вплести природно, не спамити):
+[15-20 слів через кому]
+
+АНАЛІЗ КОНКУРЕНТІВ (коротко):
+• Спільне у топ-3: структура, обсяг, фішки
+• Чим відрізнятись: що додати, чого немає у конкурентів
+---
+
+ВАЖЛИВО: Всі H2 — конкретні заголовки. Не "Переваги послуги" а "5 причин пройти УЗД калитки в ICSI Clinic". Відповідай тільки готовим ТЗ без вступів. Мова відповіді: українська.`
 }
 
 function parseBatchInput(text: string): BatchItem[] {
@@ -123,7 +254,8 @@ export default function TZGenerator() {
   const [niche, setNiche] = useState('ecommerce_sports')
   const [pageType, setPageType] = useState('article')
   const [language, setLanguage] = useState('uk')
-  const [wordRange, setWordRange] = useState('1000-1500')
+  const [charRange, setCharRange] = useState('7000-9000')
+  const [customChars, setCustomChars] = useState('')
   const [mainKeyword, setMainKeyword] = useState('')
   const [keywords, setKeywords] = useState('')
   const [competitorUrls, setCompetitorUrls] = useState('')
@@ -138,7 +270,6 @@ export default function TZGenerator() {
   const [batchInput, setBatchInput] = useState('')
   const [batchResults, setBatchResults] = useState<BatchResult[]>([])
   const [batchRunning, setBatchRunning] = useState(false)
-  const [downloadFormat, setDownloadFormat] = useState<'txt'|'csv'|'xlsx'>('csv')
   const [batchProgress, setBatchProgress] = useState(0)
   const [batchTotal, setBatchTotal] = useState(0)
   const [selectedResult, setSelectedResult] = useState<number | null>(null)
@@ -160,7 +291,7 @@ export default function TZGenerator() {
   async function generate() {
     if (!mainKeyword.trim()) { setError('Введи основний ключ!'); return }
     setError(''); setLoading(true); setOutput(''); setCopied(false)
-    const systemPrompt = buildSystemPrompt(niche, pageType, language, wordRange)
+    const systemPrompt = buildSystemPrompt(niche, pageType, language, charRange, customChars)
     const userMessage = [
       `Основний ключ: ${mainKeyword.trim()}`,
       keywords.trim() ? `Додаткові ключі: ${keywords.trim()}` : '',
@@ -195,7 +326,7 @@ export default function TZGenerator() {
     }))
     setBatchResults([...results])
 
-    const systemPrompt = buildSystemPrompt(niche, pageType, language, wordRange)
+    const systemPrompt = buildSystemPrompt(niche, pageType, language, charRange, customChars)
 
     for (let i = 0; i < items.length; i++) {
       if (stopRef.current) break
@@ -232,35 +363,13 @@ export default function TZGenerator() {
 
   function downloadAll() {
     const done = batchResults.filter(r => r.status === 'done')
-    let blob: Blob
-    let filename: string
-
-    if (downloadFormat === 'csv') {
-      const header = 'Категорія;Ключ;ТЗ\n'
-      const rows = done.map(r =>
-        `"${r.category}";"${r.mainKeyword}";"${r.result.replace(/"/g, '""').replace(/\n/g, ' ')}"`
-      ).join('\n')
-      blob = new Blob(['\uFEFF' + header + rows], { type: 'text/csv;charset=utf-8' })
-      filename = 'tz-ilion.csv'
-    } else if (downloadFormat === 'xlsx') {
-      // Simple TSV that Excel opens natively
-      const header = 'Категорія\tКлюч\tТЗ\n'
-      const rows = done.map(r =>
-        `${r.category}\t${r.mainKeyword}\t${r.result.replace(/\n/g, ' | ')}`
-      ).join('\n')
-      blob = new Blob(['\uFEFF' + header + rows], { type: 'text/tab-separated-values;charset=utf-8' })
-      filename = 'tz-ilion.xls'
-    } else {
-      const text = done.map(r =>
-        `${'='.repeat(60)}\n${r.category} | ${r.mainKeyword}\n${'='.repeat(60)}\n\n${r.result}\n\n`
-      ).join('\n')
-      blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
-      filename = 'tz-ilion.txt'
-    }
-
+    const text = done.map(r =>
+      `${'='.repeat(60)}\n${r.category} | ${r.mainKeyword}\n${'='.repeat(60)}\n\n${r.result}\n\n`
+    ).join('\n')
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url; a.download = filename; a.click()
+    a.href = url; a.download = 'tz-ilion.txt'; a.click()
     URL.revokeObjectURL(url)
   }
 
@@ -282,7 +391,10 @@ export default function TZGenerator() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.logo}>
-            <img src="data:image/png;base64,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" alt="ILION Digital" className={styles.logoImg} />
+            <span className={styles.logoI}>i</span>
+            <span className={styles.logoLion}>LION</span>
+            <span className={styles.logoDot}>.</span>
+            <span className={styles.logoDigital}>digital</span>
             <span className={styles.badge}>ТЗ Генератор</span>
           </div>
           <div className={styles.modeTabs}>
@@ -318,7 +430,10 @@ export default function TZGenerator() {
               </div>
               <div>
                 <label style={labelStyle}>Обсяг</label>
-                <select value={wordRange} onChange={e => setWordRange(e.target.value)}>{WORD_RANGES.map(w => <option key={w.id} value={w.id}>{w.label}</option>)}</select>
+                <select value={charRange} onChange={e => setCharRange(e.target.value)}>{CHAR_RANGES.map(w => <option key={w.id} value={w.id}>{w.label}</option>)}</select>
+                {charRange === 'custom' && (
+                  <input type="text" value={customChars} onChange={e => setCustomChars(e.target.value)} placeholder="напр. 6000-8000" style={{marginTop:6}} />
+                )}
               </div>
             </div>
 
@@ -405,12 +520,7 @@ export default function TZGenerator() {
                 <span className={styles.outputTitle}>🚀 Масова генерація ТЗ</span>
                 {batchResults.some(r => r.status === 'done') && (
                   <div className={styles.outputActions}>
-                    <select value={downloadFormat} onChange={e => setDownloadFormat(e.target.value as 'txt'|'csv'|'xlsx')} style={{width:'auto',padding:'5px 10px'}}>
-                    <option value="csv">CSV (Excel)</option>
-                    <option value="xlsx">XLS (Excel)</option>
-                    <option value="txt">TXT</option>
-                  </select>
-                  <button className={styles.actionBtn} onClick={downloadAll}>⬇ Скачати</button>
+                    <button className={styles.actionBtn} onClick={downloadAll}>⬇ Скачати всі ТЗ (.txt)</button>
                     <button className={`${styles.actionBtn} ${copiedBatch ? styles.actionBtnSuccess : ''}`} onClick={() => {
                       const text = batchResults.filter(r => r.status === 'done').map(r => `===\n${r.category}\n===\n${r.result}`).join('\n\n')
                       navigator.clipboard.writeText(text); setCopiedBatch(true); setTimeout(() => setCopiedBatch(false), 2500)
