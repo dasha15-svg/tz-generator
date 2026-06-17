@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
         'x-api-key': process.env.ANTHROPIC_API_KEY ?? '',
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'web-search-2025-03-05',
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
@@ -27,20 +28,29 @@ export async function POST(req: NextRequest) {
       }),
     })
 
-    const data = await response.json()
+    // Read as text first to avoid JSON parse crash
+    const rawText = await response.text()
 
-    if (!response.ok) {
-      return NextResponse.json({ error: data?.error?.message ?? 'API error' }, { status: response.status })
+    let data: { content?: Array<{ type: string; text?: string }>; error?: { message?: string } }
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      return NextResponse.json({ error: 'API returned non-JSON: ' + rawText.slice(0, 200) }, { status: 500 })
     }
 
-    const text = (data.content as Array<{ type: string; text?: string }>)
+    if (!response.ok) {
+      return NextResponse.json({ error: data?.error?.message ?? 'API error ' + response.status }, { status: response.status })
+    }
+
+    const text = (data.content ?? [])
       .filter((b) => b.type === 'text')
       .map((b) => b.text ?? '')
       .join('\n')
 
     return NextResponse.json({ text })
+
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error'
+    const message = err instanceof Error ? err.message : String(err)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
