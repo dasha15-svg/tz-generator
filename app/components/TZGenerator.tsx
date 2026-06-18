@@ -283,8 +283,15 @@ export default function TZGenerator() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ systemPrompt, userMessage }),
     })
-    const data = await res.json()
+    const raw = await res.text()
+    let data: { text?: string; error?: string }
+    try {
+      data = JSON.parse(raw)
+    } catch {
+      throw new Error('Серверна помилка: ' + raw.slice(0, 150))
+    }
     if (data.error) throw new Error(data.error)
+    if (!data.text) throw new Error('Порожня відповідь від API')
     return data.text
   }
 
