@@ -1,14 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
+export const runtime = 'edge'
 
-export const maxDuration = 10
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const body = await req.json()
     const { systemPrompt, userMessage } = body
 
     if (!systemPrompt || !userMessage) {
-      return NextResponse.json({ error: 'Missing params' }, { status: 400 })
+      return Response.json({ error: 'Missing params' }, { status: 400 })
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -20,7 +18,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 3000,
+        max_tokens: 2000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userMessage }],
       }),
@@ -32,11 +30,11 @@ export async function POST(req: NextRequest) {
     try {
       data = JSON.parse(raw)
     } catch {
-      return NextResponse.json({ error: 'API error: ' + raw.slice(0, 200) }, { status: 500 })
+      return Response.json({ error: 'API error: ' + raw.slice(0, 200) }, { status: 500 })
     }
 
     if (!response.ok) {
-      return NextResponse.json({ error: data?.error?.message ?? 'API error ' + response.status }, { status: response.status })
+      return Response.json({ error: data?.error?.message ?? 'API error ' + response.status }, { status: response.status })
     }
 
     const text = (data.content ?? [])
@@ -44,10 +42,10 @@ export async function POST(req: NextRequest) {
       .map((b) => b.text ?? '')
       .join('\n')
 
-    return NextResponse.json({ text })
+    return Response.json({ text })
 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return Response.json({ error: message }, { status: 500 })
   }
 }
