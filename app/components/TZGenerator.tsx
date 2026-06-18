@@ -189,7 +189,7 @@ URL: [URL сторінки якщо відомий]
 ${nicheSpecific}
 
 СТОРІНКИ КОНКУРЕНТІВ ДЛЯ АНАЛІЗУ:
-[якщо URL надані — проаналізуй; якщо немає — знайди топ-3 за основним ключем самостійно]
+[якщо URL надані — проаналізуй на основі своїх знань про ці сайти; якщо немає — використай знання про топ конкурентів у цій ніші]
 
 КЛЮЧОВІ СЛОВА (використати кожен мінімум 1 раз у тексті):
 • [основний ключ]
@@ -302,7 +302,7 @@ export default function TZGenerator() {
     const userMessage = [
       `Основний ключ: ${mainKeyword.trim()}`,
       keywords.trim() ? `Додаткові ключі: ${keywords.trim()}` : '',
-      competitorUrls.trim() ? `URL конкурентів:\n${competitorUrls.trim()}` : `Зроби пошук за ключем "${mainKeyword.trim()}" і проаналізуй топ-3.`,
+      competitorUrls.trim() ? `URL конкурентів для аналізу:\n${competitorUrls.trim()}` : `Проаналізуй типових топ-3 конкурентів у цій ніші за своїми знаннями.`,
       brand.trim() ? `Бренд: ${brand.trim()}` : '',
       extraContext.trim() ? `Контекст: ${extraContext.trim()}` : '',
     ].filter(Boolean).join('\n')
@@ -344,7 +344,7 @@ export default function TZGenerator() {
       const userMessage = [
         `Категорія: ${item.category}`,
         `Основний ключ: ${item.mainKeyword}`,
-        item.keywords ? `Додаткові ключі: ${item.keywords}` : `Зроби пошук за ключем "${item.mainKeyword}" і проаналізуй топ-3.`,
+        item.keywords ? `Додаткові ключі: ${item.keywords}` : `Проаналізуй типових топ-3 конкурентів у цій ніші за своїми знаннями.`,
         brand.trim() ? `Бренд: ${brand.trim()}` : '',
       ].filter(Boolean).join('\n')
 

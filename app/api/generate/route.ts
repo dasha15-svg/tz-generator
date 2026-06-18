@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export const maxDuration = 60
+export const maxDuration = 10
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,25 +17,22 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
         'x-api-key': process.env.ANTHROPIC_API_KEY ?? '',
         'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'web-search-2025-03-05',
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 3000,
         system: systemPrompt,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         messages: [{ role: 'user', content: userMessage }],
       }),
     })
 
-    // Read as text first to avoid JSON parse crash
-    const rawText = await response.text()
+    const raw = await response.text()
 
     let data: { content?: Array<{ type: string; text?: string }>; error?: { message?: string } }
     try {
-      data = JSON.parse(rawText)
+      data = JSON.parse(raw)
     } catch {
-      return NextResponse.json({ error: 'API returned non-JSON: ' + rawText.slice(0, 200) }, { status: 500 })
+      return NextResponse.json({ error: 'API error: ' + raw.slice(0, 200) }, { status: 500 })
     }
 
     if (!response.ok) {
