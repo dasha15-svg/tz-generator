@@ -277,22 +277,54 @@ export default function TZGenerator() {
   const stopRef = useRef(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  async function callAPI(systemPrompt: string, userMessage: string): Promise<string> {
+  async function callAPI(
+    systemPrompt: string,
+    userMessage: string,
+    onChunk?: (text: string) => void
+  ): Promise<string> {
     const res = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ systemPrompt, userMessage }),
     })
-    const raw = await res.text()
-    let data: { text?: string; error?: string }
-    try {
-      data = JSON.parse(raw)
-    } catch {
-      throw new Error('Серверна помилка: ' + raw.slice(0, 150))
+
+    if (!res.ok || !res.body) {
+      const raw = await res.text()
+      try {
+        const d = JSON.parse(raw)
+        throw new Error(d.error ?? 'API error')
+      } catch {
+        throw new Error('Серверна помилка: ' + raw.slice(0, 150))
+      }
     }
-    if (data.error) throw new Error(data.error)
-    if (!data.text) throw new Error('Порожня відповідь від API')
-    return data.text
+
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let fullText = ''
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() ?? ''
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue
+        const data = line.slice(6).trim()
+        if (data === '[DONE]') continue
+        try {
+          const event = JSON.parse(data)
+          if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+            fullText += event.delta.text
+            onChunk?.(fullText)
+          }
+        } catch { /* skip non-JSON lines */ }
+      }
+    }
+    if (!fullText) throw new Error('Порожня відповідь від API')
+    return fullText
   }
 
   async function generate() {
@@ -307,8 +339,7 @@ export default function TZGenerator() {
       extraContext.trim() ? `Контекст: ${extraContext.trim()}` : '',
     ].filter(Boolean).join('\n')
     try {
-      const text = await callAPI(systemPrompt, userMessage)
-      setOutput(text)
+      await callAPI(systemPrompt, userMessage, (chunk) => setOutput(chunk))
     } catch (e: unknown) {
       setError('Помилка: ' + (e instanceof Error ? e.message : String(e)))
     }

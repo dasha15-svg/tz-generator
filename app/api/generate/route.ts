@@ -9,7 +9,7 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Missing params' }, { status: 400 })
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,33 +19,26 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 2000,
+        stream: true,
         system: systemPrompt,
         messages: [{ role: 'user', content: userMessage }],
       }),
     })
 
-    const raw = await response.text()
-
-    let data: { content?: Array<{ type: string; text?: string }>; error?: { message?: string } }
-    try {
-      data = JSON.parse(raw)
-    } catch {
-      return Response.json({ error: 'API error: ' + raw.slice(0, 200) }, { status: 500 })
+    if (!anthropicRes.ok) {
+      const err = await anthropicRes.text()
+      return Response.json({ error: err.slice(0, 200) }, { status: anthropicRes.status })
     }
 
-    if (!response.ok) {
-      return Response.json({ error: data?.error?.message ?? 'API error ' + response.status }, { status: response.status })
-    }
-
-    const text = (data.content ?? [])
-      .filter((b) => b.type === 'text')
-      .map((b) => b.text ?? '')
-      .join('\n')
-
-    return Response.json({ text })
-
+    // Pipe SSE stream directly to client
+    return new Response(anthropicRes.body, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'X-Accel-Buffering': 'no',
+      },
+    })
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err)
-    return Response.json({ error: message }, { status: 500 })
+    return Response.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 })
   }
 }
